@@ -1,9 +1,9 @@
 library(reshape2)
-library(sqldf)
+library(data.table)
 setwd("~//..//Downloads//DSCoursera//cleaningData//UCI HAR Dataset/")
 #Read test set
 test <- cbind(fread("test/subject_test.txt",header=FALSE),
-              fread("test//y_test.txt"),
+                fread("test//y_test.txt"),
               data.table(read.table("test//X_test.txt",header=FALSE)))
 
 #Read train set
@@ -30,28 +30,26 @@ setnames(activitiesLabel,c(1:2),c("ActivityCode","Activity"))
 filteredData <- merge(x=filteredData,y=activitiesLabel
                       ,by=c("ActivityCode"))[,c(1,2,82,3:81),with=FALSE]
 
-#Creates a second, independent tidy data set with the average of 
+#Create CodeBook
+source("./descriptiveLabelTinyDataset.r")
+datanames <- descriptiveLabelTinyDataset("./meanEachVariableBySubjectIDAndActCode.txt")
+orig <- paste(paste("* ",datanames$`Original name`))
+des <- datanames$`Descriptive name`
+write.table(data.table(orig,des,as.character(lapply(filteredData,class))),
+            file="Codebook.md",
+            quote = FALSE, 
+            col.names=FALSE, 
+            row.names=FALSE,
+            sep=":\t")
+
+#5.Creates a second, independent tidy data set with the average of 
 #each variable for each activity and each subject. 
 dataMelt <- melt(filteredData,id=c("SubjectID","ActivityCode","Activity"))
 meanVariablesBySubjectIDAndActCode  <- dcast(dataMelt, 
                                    SubjectID + ActivityCode + Activity ~ variable,
                                    mean)
+names(meanVariablesBySubjectIDAndActCode) <- des
 write.csv(meanVariablesBySubjectIDAndActCode
           ,file="./meanEachVariableBySubjectIDAndActCode.csv",row.names=FALSE)
-#Or using aggregate
-#meanVariablesBySubjectID1 <- aggregate(.~SubjectID+ActivityCode+Activity, data=filteredData,mean)
-#meanVariablesBySubjectID1 <- arrange(meanVariablesBySubjectID1,SubjectID,ActivityCode,Activity)
 
-data(iris)
-datanames <- names(iris)
-outputlines <- paste("* ",datanames , sep="")
-write.table(outputlines,file="listofnames.md", quote = FALSE, col.names=FALSE, row.names=FALSE)
-
-
-#Criteria
-# The explanation is as important as the script, so make sure you have the readme
-#(x) have you combined the training and test x and y into one block, given them headings, and turned the numeric activities into something easier to read.
-#(x) have you extracted some variables to do with mean and standard deviation from the full set
-#() have you explained what those variables are and your criteria for picking them in the readme
-#() have you gotten the average of each variable for each combination of subject and activity and saved the data frame of this as a set of tidy data
-# have you loaded up your current script, an up to date readme! and your tidy data
+unique(filteredData$ActivityCode)
