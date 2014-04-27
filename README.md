@@ -1,7 +1,6 @@
 # README
 ==============================
 Tiny data set which derived from UCI HAR Dataset
-==============================
 ## Files list and their description:
 - README.md
 - run_analysis.R: Generate tiny data from raw dataset (UCI HAR Dataset)
