@@ -1,4 +1,6 @@
-# README: Tiny data set which derived from UCI HAR Dataset
+# README
+==============================
+Tiny data set which derived from UCI HAR Dataset
 ==============================
 ## Files list and their description:
 - README.md
